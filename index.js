@@ -5,6 +5,8 @@ const app = express()
 const cors = require('cors')
 require('dotenv').config()
 
+const User = require('./database/User')
+
 const port = process.env.PORT || 3000
 const mongoURI = process.env.MONGO_URI
 const Schema = mongoose.Schema;
@@ -16,12 +18,6 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 mongoose.connect(mongoURI, { useNewUrlParser: true })
-
-const userSchema = new Schema({
-  username: { type: String, required: true }
-})
-
-let User = mongoose.model("User", userSchema)
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
