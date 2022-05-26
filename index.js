@@ -41,25 +41,16 @@ app.post('/api/users', (req, res) => {
     })
 })
 
-//GET /api/users => returns an array
-/*[
-  {
-"_id": "61204ee8f5860e05a3652f0e",
-"username": "fcc_test_16295073006",
-"__v": 0
-},
-{
-"_id": "61204ee8f5860e05a3652f0f",
-"username": "fcc_test_16295073012",
-"__v": 0
-},
-{
-"_id": "61204ee9f5860e05a3652f11",
-"username": "fcc_test_16295073016",
-"__v": 0
-}
-]
-*/
+//GET /api/users
+app.get('/api/users', (req, res) => {
+  User.find()
+    .then(data => {
+      res.json(data)
+    })
+    .catch(err => {
+      res.json(err)
+    })
+})
 
 //POST /api/users/:_id/exercises
 app.post('/api/users/:_id/exercises', (req, res) => {
