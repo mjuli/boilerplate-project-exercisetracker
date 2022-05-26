@@ -6,6 +6,7 @@ const cors = require('cors')
 require('dotenv').config()
 
 const User = require('./database/User')
+const Exercise = require('./database/Exercise')
 
 const port = process.env.PORT || 3000
 const mongoURI = process.env.MONGO_URI
@@ -41,6 +42,25 @@ app.post('/api/users', (req, res) => {
 })
 
 //POST /api/users/:_id/exercises
+app.post('/api/users/:_id/exercises', (req, res) => {
+  const exercise = {
+    _id: mongoose.Types.ObjectId(req.params._id),
+    description: req.body.description,
+    duration: req.body.duration,
+    date: new Date(req.body.date)
+  }
+
+  new Exercise( exercise )
+    .save()
+    .then(() => {
+      exercise.date = exercise.date.toDateString()
+
+      res.json(exercise)
+    })
+    .catch(err => {
+      res.json(err)
+    })
+})
 
 //GET /api/users/:_id/logs?[from][&to][&limit]
 
