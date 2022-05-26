@@ -59,28 +59,81 @@ app.post('/api/users/:_id/exercises', (req, res) => {
   if(req.body.date)
     date = new Date(req.body.date)
 
-  const userId = mongoose.Types.ObjectId(req.params._id)
+  const userId = req.params._id
 
   const exercise = {
+    date,
+    userId,
     description: req.body.description,
-    duration: req.body.duration,
-    date
+    duration: Number(req.body.duration)
   }
 
-  new Exercise({ ...exercise, userId })
-    .save()
-    .then(() => {
-      exercise.date = exercise.date.toDateString()
-      exercise._id = userId
+  User.findById(userId)
+    .then(user => {
+      new Exercise(exercise)
+        .save()
+        .then(() => {
+          const userExercise = {
+            username: user.username,
+            date: exercise.date.toDateString(),
+            duration: exercise.duration,
+            description: exercise.description,
+            _id: userId,
+          }
 
-      res.json(exercise)
+          console.log(userExercise)
+          res.json(userExercise)
+        })
+        .catch(err => {
+          console.log('Erro1:', err)
+
+          res.json(err)
+        })
+    })
+    .catch(err => {
+      console.log('Erro2:', err)
+
+      res.json(err)
+    })
+
+})
+
+//GET /api/users/:_id/logs?[from][&to][&limit]
+app.get(`/api/users/:_id/logs`, (req, res) => {
+  const userId = req.params._id
+
+  User.findById(userId)
+    .then(user => {
+      Exercise.find({ userId })
+        .then(exercises => {
+          const userExercises = exercises
+            .map(exercise => {
+              const exerc = {
+                description: exercise.description,
+                duration: exercise.duration,
+                date: exercise.date.toDateString()
+              }
+
+              return exerc
+            })
+
+          const logs = {
+            _id: userId,
+            username: user.username,
+            count: userExercises.length,
+            log: userExercises
+          }
+
+          res.json(logs)
+        })
+        .catch(err => {
+          res.json(err)
+        })
     })
     .catch(err => {
       res.json(err)
     })
 })
-
-//GET /api/users/:_id/logs?[from][&to][&limit]
 
 const listener = app.listen(port, () => {
   console.log('Your app is listening on port ' + listener.address().port)
