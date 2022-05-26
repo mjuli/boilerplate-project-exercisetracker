@@ -75,24 +75,19 @@ app.post('/api/users/:_id/exercises', (req, res) => {
         .then(() => {
           const userExercise = {
             username: user.username,
-            date: exercise.date.toDateString(),
+            date: new Date(exercise.date).toDateString(),
             duration: exercise.duration,
             description: exercise.description,
-            _id: userId,
+            _id: user._id,
           }
 
-          console.log(userExercise)
           res.json(userExercise)
         })
         .catch(err => {
-          console.log('Erro1:', err)
-
           res.json(err)
         })
     })
     .catch(err => {
-      console.log('Erro2:', err)
-
       res.json(err)
     })
 
@@ -101,6 +96,18 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 //GET /api/users/:_id/logs?[from][&to][&limit]
 app.get(`/api/users/:_id/logs`, (req, res) => {
   const userId = req.params._id
+  const from = req.query.from
+  const to = req.query.to
+  const limit = req.query.limit
+
+  let fromDate = new Date(0)
+  let toDate = new Date()
+
+  if(from)
+    fromDate = new Date(from)
+
+  if(to)
+    toDate = new Date(to)
 
   User.findById(userId)
     .then(user => {
@@ -111,11 +118,15 @@ app.get(`/api/users/:_id/logs`, (req, res) => {
               const exerc = {
                 description: exercise.description,
                 duration: exercise.duration,
-                date: exercise.date.toDateString()
+                date: new Date(exercise.date).toDateString()
               }
 
               return exerc
             })
+            .filter(exerc => new Date(exerc.date) >= fromDate && new Date(exerc.date) <= toDate)
+
+          if(limit && limit < userExercises.length)
+            userExercises.length = limit
 
           const logs = {
             _id: userId,
