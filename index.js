@@ -41,19 +41,46 @@ app.post('/api/users', (req, res) => {
     })
 })
 
+//GET /api/users => returns an array
+/*[
+  {
+"_id": "61204ee8f5860e05a3652f0e",
+"username": "fcc_test_16295073006",
+"__v": 0
+},
+{
+"_id": "61204ee8f5860e05a3652f0f",
+"username": "fcc_test_16295073012",
+"__v": 0
+},
+{
+"_id": "61204ee9f5860e05a3652f11",
+"username": "fcc_test_16295073016",
+"__v": 0
+}
+]
+*/
+
 //POST /api/users/:_id/exercises
 app.post('/api/users/:_id/exercises', (req, res) => {
+  let date = new Date()
+
+  if(req.body.date)
+    date = new Date(req.body.date)
+
+  const userId = mongoose.Types.ObjectId(req.params._id)
+
   const exercise = {
-    _id: mongoose.Types.ObjectId(req.params._id),
     description: req.body.description,
     duration: req.body.duration,
-    date: new Date(req.body.date)
+    date
   }
 
-  new Exercise( exercise )
+  new Exercise({ ...exercise, userId })
     .save()
     .then(() => {
       exercise.date = exercise.date.toDateString()
+      exercise._id = userId
 
       res.json(exercise)
     })
